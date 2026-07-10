@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import jdk.internal.joptsimple.internal.Strings;
 
 @Mojo(name = "generate-code", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = org.apache.maven.plugins.annotations.ResolutionScope.COMPILE)
 @org.apache.maven.plugins.annotations.Execute(phase = LifecyclePhase.GENERATE_SOURCES)
@@ -104,7 +105,7 @@ public class ExposeGeneratorMojo extends AbstractMojo {
                     "     * See: {@link #json}\n" +
                     "     * @return \n" +
                     "     */\n" +
-                    "    public %s %s() { return %s; }";
+                    "    public %s %s() { return %s; }\n";
 
             // Construct the exact signature you requested
             String methodBlock = String.format(template,
@@ -114,47 +115,33 @@ public class ExposeGeneratorMojo extends AbstractMojo {
         }
     }
 
-    public static Optional<String> getStringValue(Optional<AnnotationExpr> annotationOpt) {
-        if (!annotationOpt.isPresent()) {
-            return Optional.empty();
-        }
-
-        AnnotationExpr annotation = annotationOpt.get();
-
-        // 1. Handle Single Member Format: @Expose("myValue")
-        if (annotation.isSingleMemberAnnotationExpr()) {
-            return Optional.of(annotation.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().getValue());
-        }
-
-        // 2. Handle Normal Format: @Expose(value = "myValue")
-        if (annotation.isNormalAnnotationExpr()) {
-            for (MemberValuePair pair : annotation.asNormalAnnotationExpr().getPairs()) {
-                if ("value".equals(pair.getNameAsString())) {
-                    return Optional.of(pair.getValue().asStringLiteralExpr().getValue());
-                }
-            }
-        }
-
-        // 3. Handle Marker Format: @Expose (fallback to your default value if applicable)
-        return Optional.empty();
-    }
-
-    private boolean writeGeneratedBlock(List<String> generatedMethods, String content, Path path, String beginBlockString,
+    private boolean writeGeneratedBlock(List<String> lines, String content, Path path, String beginBlockString,
             String endBlockString)
             throws IOException {
         // Build the block content
         StringBuilder blockBuilder = new StringBuilder();
-        blockBuilder.append("\n\n").append(beginBlockString).append("\n");
-        for (String method : generatedMethods) {
-            blockBuilder.append(method);
+        blockBuilder.append(beginBlockString).append("\n");
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            blockBuilder.append(line);
+            if (i < lines.size() - 1) {
+                blockBuilder.append("\n");
+            }
         }
-        blockBuilder.append(endBlockString).append("");
+
+        blockBuilder.append("\n").append(endBlockString);
         String targetReplacementBlock = blockBuilder.toString();
         String updatedContent;
-        String regex = "(\\s*" + beginBlockString + ")[\\s\\S]*?(" + endBlockString + ")";
-        if (content.contains(beginBlockString) && content.contains(endBlockString)) {
-            // Scenario A: Overwrite the existing code block entirely
-            updatedContent = content.replaceAll(regex, targetReplacementBlock);
+
+        final int beginBlockIndex = content.indexOf(beginBlockString);
+        final int endBlockIndex = content.indexOf(endBlockString);
+        if (beginBlockIndex != -1 && endBlockIndex != -1 && beginBlockIndex < endBlockIndex) {
+            int endPos = endBlockIndex + endBlockString.length();
+
+            StringBuilder sb = new StringBuilder(content);
+            sb.replace(beginBlockIndex, endPos, targetReplacementBlock);
+            updatedContent = sb.toString();
         } else {
             // Scenario B: Smart Insert if anchors do not exist yet
             // Find the last closing brace '}' of the class definition and insert before it
