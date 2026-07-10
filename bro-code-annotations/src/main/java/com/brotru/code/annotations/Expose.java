@@ -12,5 +12,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface Expose {
+    /**
+     * This value is added into the javadoc top of the generated method.
+     * @return javadoc part.
+     */
+    String value() default ""; 
 }
 

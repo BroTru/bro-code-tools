@@ -5,6 +5,9 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -17,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Mojo(name = "generate-code", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = org.apache.maven.plugins.annotations.ResolutionScope.COMPILE)
@@ -74,24 +78,65 @@ public class ExposeGeneratorMojo extends AbstractMojo {
     }
 
     private String getBeginBlock() {
-        return "    // <editor-fold defaultstate=\"collapsed\" desc=\"Generated Code DO NOT EDIT\">\n    // region Generated Code\n    //GEN-BEGIN:GeneratedCode\n";
+        return "// <editor-fold defaultstate=\"collapsed\" desc=\"Generated Code DO NOT EDIT\">\n// region Generated Code\n";
     }
 
     private String getEndBlock() {
-        return "    //GEN-END:GeneratedCode\n    // endregion\n    // </editor-fold>";
+        return "// endregion\n// </editor-fold>";
     }
 
     private void processExposeAnnotations(FieldDeclaration field, List<String> generatedLines) {
         if (field.isAnnotationPresent(Expose.class)) {
+            final Optional<AnnotationExpr> annotation = field.getAnnotationByClass(Expose.class);
+//            final String additionalJavadoc = getStringValue(annotation).orElse("").trim();
+            final String additionalJavadoc = annotation
+                    .flatMap(ann -> ann.findFirst(StringLiteralExpr.class))
+                    .map(StringLiteralExpr::getValue)
+                    .orElse("");
             String fieldName = field.getVariable(0).getNameAsString();
             String fieldType = field.getElementType().asString();
+            String template = "    /**\n";
+            if (!additionalJavadoc.isBlank()) {
+                template = template + "     * " + additionalJavadoc + "\n";
+            }
+            template = template +
+                    "     * Returns instance of {@link JsonTool}.\n" +
+                    "     * See: {@link #json}\n" +
+                    "     * @return \n" +
+                    "     */\n" +
+                    "    public %s %s() { return %s; }";
 
             // Construct the exact signature you requested
-            String methodBlock = String.format(
-                    "    public %s %s() { return %s; }\n",
+            String methodBlock = String.format(template,
+
                     fieldType, fieldName, fieldName);
             generatedLines.add(methodBlock);
         }
+    }
+
+    public static Optional<String> getStringValue(Optional<AnnotationExpr> annotationOpt) {
+        if (!annotationOpt.isPresent()) {
+            return Optional.empty();
+        }
+
+        AnnotationExpr annotation = annotationOpt.get();
+
+        // 1. Handle Single Member Format: @Expose("myValue")
+        if (annotation.isSingleMemberAnnotationExpr()) {
+            return Optional.of(annotation.asSingleMemberAnnotationExpr().getMemberValue().asStringLiteralExpr().getValue());
+        }
+
+        // 2. Handle Normal Format: @Expose(value = "myValue")
+        if (annotation.isNormalAnnotationExpr()) {
+            for (MemberValuePair pair : annotation.asNormalAnnotationExpr().getPairs()) {
+                if ("value".equals(pair.getNameAsString())) {
+                    return Optional.of(pair.getValue().asStringLiteralExpr().getValue());
+                }
+            }
+        }
+
+        // 3. Handle Marker Format: @Expose (fallback to your default value if applicable)
+        return Optional.empty();
     }
 
     private boolean writeGeneratedBlock(List<String> generatedMethods, String content, Path path, String beginBlockString,
