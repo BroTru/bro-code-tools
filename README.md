@@ -31,8 +31,8 @@ Sample usage:
     public JsonTool json() { return json; }
 
     /**
-     * Returns instance of {@link JsonTool}.
-     * See: {@link #json}
+     * Returns instance of {@link ChatCompletion}.
+     * See: {@link #chatCompletion}
      * @return 
      */
     public ChatCompletion chatCompletion() { return chatCompletion; }
