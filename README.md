@@ -3,7 +3,7 @@
 
 ### @Expose annotation
 
-Right now the only tool there is an @Expose annotation and it's processing that generate getter-like method that has the same name as the field.  The method is placed in the code, in the bottom of the file.  It does similar things to Lombok but it does not manipulate bytecode so there are no issues with debugging, java versions compatilitity etc.  It's a simple code generation.  You can see the code, you can generate it each build or on-demand.  Generated code is surrounded by code collapse tags recognized by major IDEs.
+Right now the only tool there is an @Expose annotation and it's processing that generate getter-like method that has the same name as the field.  The method is placed in the code, in the bottom of the file.  It does similar things to Lombok but it does not manipulate bytecode so there are no issues with debugging, java versions compatilitity etc.  It's a simple code generation.  You can see the code, you can generate it each build or on-demand.  Generated code is surrounded by code collapse tags recognized by major IDEs.  You can benerate multiple times - it recognizes the tags surrounding generated code and just replaces old generated code with new version.
 
 Generated code contains javadocs, There's some default javadocs but you can add any text in the annotation value; see the example.  Javadoc generation without any delombok playing is a major benefit of using that.  At least for me ;)
 
