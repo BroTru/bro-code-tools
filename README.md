@@ -40,3 +40,22 @@ Sample usage:
 // endregion
 // </editor-fold>
 ```
+To use the tool - you can use the 'generate-code' maven goal, you can do it on demand or during build
+```xml
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.brotru.code.tools</groupId>
+                <artifactId>bro-code-generator</artifactId>
+                <version>2026.01-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-code</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+```
