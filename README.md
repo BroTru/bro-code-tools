@@ -5,13 +5,13 @@ Right now the only tool there is an @Expose annotation and it's processing that 
 
 Sample usage:
 ```java
-    /**
+      /**
      * Contains Json parsing related tools.
      */
     @Expose
     private final JsonTool json;
 
-    @Expose
+    @Expose("Chat completion request related client classes")
     private final ChatCompletion chatCompletion;
 
     public Model() {
@@ -20,20 +20,22 @@ Sample usage:
         chatCompletion = new ChatCompletion(this);
     }
 
+
 // <editor-fold defaultstate="collapsed" desc="Generated Code DO NOT EDIT">
 // region Generated Code
 
     /**
      * Returns instance of {@link JsonTool}.
      * See: {@link #json}
-     * @return 
+     * @return {@link JsonTool} instance from field {@link #json}
      */
     public JsonTool json() { return json; }
 
     /**
+     * Chat completion request related client classes
      * Returns instance of {@link ChatCompletion}.
      * See: {@link #chatCompletion}
-     * @return 
+     * @return {@link ChatCompletion} instance from field {@link #chatCompletion}
      */
     public ChatCompletion chatCompletion() { return chatCompletion; }
 
