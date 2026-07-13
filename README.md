@@ -1,2 +1,42 @@
 # bro-code-tools
-misc code tools - for java mostly
+## misc code tools - for java mostly.
+
+Right now the only tool there is an @Expose annotation and it's processing that generate getter-like method that has the same name as the field.  The method is placed in the code, in the bottom of the file.  It does similar things to Lombok but it does not manipulate bytecode so there are no issues with debugging, java versions compatilitity etc.  It's a simple code generation.  You can see the code, you can generate it each build or on-demand.  Generated code is surrounded by code collapse tags recognized by major IDEs.
+
+Sample usage:
+```java
+    /**
+     * Contains Json parsing related tools.
+     */
+    @Expose
+    private final JsonTool json;
+
+    @Expose
+    private final ChatCompletion chatCompletion;
+
+    public Model() {
+        super();
+        json = new JsonTool();
+        chatCompletion = new ChatCompletion(this);
+    }
+
+// <editor-fold defaultstate="collapsed" desc="Generated Code DO NOT EDIT">
+// region Generated Code
+
+    /**
+     * Returns instance of {@link JsonTool}.
+     * See: {@link #json}
+     * @return 
+     */
+    public JsonTool json() { return json; }
+
+    /**
+     * Returns instance of {@link JsonTool}.
+     * See: {@link #json}
+     * @return 
+     */
+    public ChatCompletion chatCompletion() { return chatCompletion; }
+
+// endregion
+// </editor-fold>
+```
