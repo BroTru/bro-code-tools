@@ -1,5 +1,7 @@
 # bro-code-tools
-## misc code tools - for java mostly.
+## misc code tools for Java.
+
+I'm putting here some code tools that I create and use myself.  If they're useful for others - that's great, feel free to use them.
 
 ### @Expose annotation
 
