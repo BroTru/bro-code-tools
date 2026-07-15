@@ -25,3 +25,4 @@ replay_pid*
 /target/
 /bro-code-generator/target/
 /bro-code-annotations/target/
+/bro-code-generator/nbproject/
