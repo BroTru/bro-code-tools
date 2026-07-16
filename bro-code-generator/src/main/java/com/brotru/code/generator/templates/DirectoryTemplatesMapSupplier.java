@@ -1,4 +1,4 @@
-package com.brotru.code.generator.templates.pebble;
+package com.brotru.code.generator.templates;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,11 +12,11 @@ import java.util.stream.Stream;
  *
  * @author bronek
  */
-public class DirectoryTemplatesMapProvider implements Supplier<Map<String, String>> {
+public class DirectoryTemplatesMapSupplier implements TemplatesMapSupplier {
 
     private final Path templatesRootDirectory;
 
-    public DirectoryTemplatesMapProvider(Path templatesRootDirectory) {
+    public DirectoryTemplatesMapSupplier(Path templatesRootDirectory) {
         this.templatesRootDirectory = templatesRootDirectory;
     }
 

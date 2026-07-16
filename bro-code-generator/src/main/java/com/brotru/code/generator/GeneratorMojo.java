@@ -37,13 +37,16 @@ public class GeneratorMojo extends AbstractMojo {
     // Optional: Allow users to override the template directory name in their POM configuration
     @Parameter(defaultValue = "src/main/templates")
     private String templateDirectoryPath;
-    
-    private final GeneratedBlockProcessor generatedBlockProcessor = new GeneratedBlockProcessor(new LogMojoImpl(getLog()).setPrefix("block-processor: "));
+
+    private final GeneratedBlockProcessor generatedBlockProcessor = new GeneratedBlockProcessor(
+            new LogMojoImpl(getLog()).setPrefix("block-processor: "));
 
     private final ExposeProcessor expose = new ExposeProcessor();
-    
+
     @Override
     public void execute() throws MojoExecutionException {
+        JavaParserHelper.initializeTypeSolvers(sourceDirectory);
+        
         if (singleFile != null && !singleFile.isEmpty()) {
             File targetFile = new File(singleFile);
             if (targetFile.exists() && targetFile.isFile()) {
@@ -88,8 +91,9 @@ public class GeneratorMojo extends AbstractMojo {
 
     /**
      * Single field processing.
+     * 
      * @param field
-     * @param fragments 
+     * @param fragments
      */
     private void processField(FieldDeclaration field, final List<String> fragments) throws MojoExecutionException {
         expose.process(field, fragments);
@@ -105,33 +109,33 @@ public class GeneratorMojo extends AbstractMojo {
         }
 
         getLog().info("Reading templates from: " + templateFolder.getAbsolutePath());
-         Map<String, String> templateMap = new HashMap<>();
+        Map<String, String> templateMap = new HashMap<>();
 
-         Path templateRoot = new File(baseDir, templateDirectoryPath).toPath();
-         
+        Path templateRoot = new File(baseDir, templateDirectoryPath).toPath();
+
         // 2. Recursively walk through the directory tree
         try (Stream<Path> stream = Files.walk(templateRoot)) {
             stream
-                .filter(Files::isRegularFile) // Ignore directories themselves
-                .forEach(filePath -> {
-                    try {
-                        // 3. Calculate the relative path from the root template directory
-                        // Example: "src/main/templates/fields/myTemplate.txt" -> "fields/myTemplate.txt"
-                        Path relativePath = templateRoot.relativize(filePath);
-                        
-                        // Replace OS-specific backslashes with standard forward slashes if needed
-                        String key = relativePath.toString().replace('\\', '/');
-                        
-                        // 4. Read the file contents entirely as a String
-                        String content = Files.readString(filePath);
-                        
-                        templateMap.put(key, content);
-                        getLog().debug("Loaded template: " + key);
-                        
-                    } catch (IOException e) {
-                        getLog().error("Failed to read template file: " + filePath, e);
-                    }
-                });
+                    .filter(Files::isRegularFile) // Ignore directories themselves
+                    .forEach(filePath -> {
+                        try {
+                            // 3. Calculate the relative path from the root template directory
+                            // Example: "src/main/templates/fields/myTemplate.txt" -> "fields/myTemplate.txt"
+                            Path relativePath = templateRoot.relativize(filePath);
+
+                            // Replace OS-specific backslashes with standard forward slashes if needed
+                            String key = relativePath.toString().replace('\\', '/');
+
+                            // 4. Read the file contents entirely as a String
+                            String content = Files.readString(filePath);
+
+                            templateMap.put(key, content);
+                            getLog().debug("Loaded template: " + key);
+
+                        } catch (IOException e) {
+                            getLog().error("Failed to read template file: " + filePath, e);
+                        }
+                    });
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to scan template directory", e);
         }
@@ -140,7 +144,7 @@ public class GeneratorMojo extends AbstractMojo {
         getLog().info("Successfully loaded " + templateMap.size() + " templates.");
 
     }
-    
+
     private String getBeginBlock() {
         return Const.GENERATED_BLOCK_BEGIN_TAG;
     }
@@ -148,7 +152,5 @@ public class GeneratorMojo extends AbstractMojo {
     private String getEndBlock() {
         return Const.GENERATED_BLOCK_END_TAG;
     }
-
-
 
 }

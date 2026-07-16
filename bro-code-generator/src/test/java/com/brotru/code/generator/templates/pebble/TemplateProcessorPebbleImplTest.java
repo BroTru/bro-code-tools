@@ -1,16 +1,17 @@
 package com.brotru.code.generator.templates.pebble;
 
 import com.brotru.code.generator.logging.LogJulImpl;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -36,36 +37,30 @@ public class TemplateProcessorPebbleImplTest {
     public void tearDown() throws Exception {
     }
 
-    /**
-     * Test of initialize method, of class TemplateProcessorPebbleImpl.
-     */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testInitialize_MapEntryArr() {
-        logger.info("initialize");
+        logger.info("initialize start");
         TemplateProcessorPebbleImpl instance = new TemplateProcessorPebbleImpl(new LogJulImpl(logger))
                 .initialize();
-        
-        assertNotNull(instance);        
+
+        assertNotNull(instance.engine);
+        logger.info("initialize end");
     }
 
-    /**
-     * Test of evaluate method, of class TemplateProcessorPebbleImpl.
-     */
-    @org.junit.jupiter.api.Test
-    public void testEvaluate() throws Exception {
-        logger.info("evaluate");
-        FieldDeclaration field = null;
-        String templateName = "key";
+    @Test
+    public void testEvaluateWithContext() throws Exception {
+        logger.info("evaluate start");
+        String templateName = "template-1";
         TemplateProcessorPebbleImpl instance = new TemplateProcessorPebbleImpl(new LogJulImpl(logger))
                 .initialize(new AbstractMap.SimpleEntry<>(templateName, "name: {{name}}"));
         String expResult = "name: John";
-        
+
         Map<String, Object> context = new HashMap<>();
         context.put("name", "John");
 
         String result = instance.evaluate(templateName, context);
         assertEquals(expResult, result);
-
+        logger.info("evaluate end");
     }
 
 }
